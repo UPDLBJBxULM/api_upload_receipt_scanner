@@ -1,5 +1,6 @@
-const { uploadFileToDrive, uploadMultipleFilesToDrive } = require('../services/googleDriveService');
+const { uploadFileToDrive, renameFileInDrive, uploadMultipleFilesToDrive } = require('../services/googleDriveService');
 
+// Fungsi untuk mengupload file tunggal
 const uploadFile = async (req, res) => {
   console.log('File upload request received');
   console.log('Request body:', req.body);
@@ -20,6 +21,29 @@ const uploadFile = async (req, res) => {
     console.log('Calling uploadFileToDrive');
     const { fileId, fileLink } = await uploadFileToDrive(req.file, 'scan');
     console.log('File uploaded successfully', { fileId, fileLink });
+
+    // Mengambil data untuk penamaan file baru
+    const accountSKKO = req.body.accountSKKO; // Asumsikan ini diambil dari field di request
+    const timestamp = new Date().toLocaleDateString('id-ID').split('/').reverse().join(''); // Format yyyymmdd
+    console.log('Request body:', req.body);
+    console.log('Account SKKO:', req.body.accountSKKO);
+
+    // Mengekstrak bagian dari accountSKKO
+    let newFileName;
+    if (accountSKKO) {
+      const parts = accountSKKO.split(' - '); // Memisahkan berdasarkan ' - '
+      const accountNumber = parts[1]; // Ambil account number
+      const subgl = parts.length > 2 ? parts[0].trim() : ''; // Ambil subgl jika ada
+      const prefix = subgl ? `${subgl}_` : ''; // Prefix berdasarkan subgl jika ada
+      
+      newFileName = `${timestamp}_${prefix}${accountNumber}`; // Format penamaan
+    }
+
+    // Melakukan rename setelah upload hanya jika accountSKKO terisi
+    if (newFileName) {
+      await renameFileInDrive(fileId, newFileName);
+    }
+
     res.status(200).json({
       status: 'success',
       response: 200,
@@ -57,7 +81,6 @@ const uploadFile = async (req, res) => {
       data: {
         message
       }
-      // stack tidak disertakan di sini
     };
 
     console.log('Sending error response:', errorResponse);
@@ -65,6 +88,7 @@ const uploadFile = async (req, res) => {
   }
 };
 
+// Fungsi untuk mengupload multiple files
 const uploadMultipleFiles = async (req, res) => {
   console.log('Multiple file upload request received');
   console.log('Request body:', req.body);
@@ -83,7 +107,35 @@ const uploadMultipleFiles = async (req, res) => {
 
   try {
     console.log('Calling uploadMultipleFilesToDrive');
-    const uploadedFiles = await uploadMultipleFilesToDrive(req.files, 'bukti');
+    const accountSKKO = req.body.accountSKKO; // Ambil accountSKKO dari body
+    const timestamp = new Date().toLocaleDateString('id-ID').split('/').reverse().join(''); // Format yyyymmdd
+    console.log('Request body:', req.body);
+    console.log('Account SKKO:', req.body.accountSKKO);
+
+    const uploadedFiles = [];
+    for (let i = 0; i < req.files.length; i++) {
+      const file = req.files[i];
+      const { fileId, fileLink } = await uploadFileToDrive(file, 'bukti');
+
+      // Menyusun nama file baru dengan increment jika accountSKKO terisi
+      let newFileName;
+      if (accountSKKO) {
+        const parts = accountSKKO.split(' - '); // Memisahkan berdasarkan ' - '
+        const accountNumber = parts[1]; // Ambil account number
+        const subgl = parts.length > 2 ? parts[0].trim() : ''; // Ambil subgl jika ada
+        const prefix = subgl ? `${subgl}_` : ''; // Prefix berdasarkan subgl jika ada
+
+        newFileName = `${timestamp}_${prefix}${accountNumber}_${i + 1}`; // Format penamaan
+      }
+
+      // Melakukan rename setelah upload hanya jika accountSKKO terisi
+      if (newFileName) {
+        await renameFileInDrive(fileId, newFileName);
+      }
+
+      uploadedFiles.push({ fileId, fileLink });
+    }
+
     console.log('Files uploaded successfully', uploadedFiles);
     res.status(200).json({
       status: 'success',
@@ -119,7 +171,6 @@ const uploadMultipleFiles = async (req, res) => {
       data: {
         message
       }
-      // stack tidak disertakan di sini
     };
 
     console.log('Sending error response:', errorResponse);
