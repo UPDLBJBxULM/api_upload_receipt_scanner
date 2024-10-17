@@ -1,6 +1,6 @@
-<h1>BackEnd Services for JobGuardian Application</h1>
+<h1>BackEnd Services for Petty Easy</h1>
 
-![Cloud Achitecture Job Guardian]([https://storage.googleapis.com/jobguardian-app-storage/architecture/Cloud%20Architecture%20JobGuardian.png](https://drive.google.com/file/d/1DjxFFtc8aH_xkS1guUHxTvhH_hmEre6z/view?usp=sharing))
+![Cloud Achitecture Petty Easy]([https://storage.cloud.google.com/storage_file_updlbjb/photo/FLOW2.png]))
 
 <h2>Steps on how to replicate the REST API for mobile and the FLASK API for model that created in this project :</h2>
 
