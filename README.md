@@ -1,6 +1,6 @@
 <h1>BackEnd Services for JobGuardian Application</h1>
 
-![Cloud Achitecture Job Guardian](https://storage.googleapis.com/jobguardian-app-storage/architecture/Cloud%20Architecture%20JobGuardian.png)
+![Cloud Achitecture Job Guardian]([https://storage.googleapis.com/jobguardian-app-storage/architecture/Cloud%20Architecture%20JobGuardian.png](https://drive.google.com/file/d/1DjxFFtc8aH_xkS1guUHxTvhH_hmEre6z/view?usp=sharing))
 
 <h2>Steps on how to replicate the REST API for mobile and the FLASK API for model that created in this project :</h2>
 
