@@ -1,6 +1,6 @@
 <h1>BackEnd Services for Petty Easy</h1>
 
-![Cloud Architecture](https://storage.googleapis.com/bucket_name/photo/FLOW2.png)
+![Cloud Architecture]([https://storage.googleapis.com/bucket_name/photo/FLOW2.png](https://storage.googleapis.com/storage_file_updlbjb/photo/FLOW2.png))
 
 <h2>Steps on how to replicate the REST API for mobile and the FLASK API for model that created in this project :</h2>
 
