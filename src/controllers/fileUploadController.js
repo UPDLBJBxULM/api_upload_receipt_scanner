@@ -33,10 +33,12 @@ const uploadFile = async (req, res) => {
     if (accountSKKO) {
       const parts = accountSKKO.split(' - '); // Memisahkan berdasarkan ' - '
       const accountNumber = parts[1]; // Ambil account number
-      const subgl = parts.length > 2 ? parts[0].trim() : ''; // Ambil subgl jika ada
-      const prefix = subgl ? `${subgl}_` : ''; // Prefix berdasarkan subgl jika ada
-      
-      newFileName = `${timestamp}_${prefix}${accountNumber}`; // Format penamaan
+      const subParts = parts[0].split(' / ');
+      const pos = subParts.length > 1 ? subParts[0].trim() : ''; // Ambil POS jika ada
+      const subgl = subParts.length > 1 ? subParts[1].trim() : ''; // Ambil subgl jika ada
+      console.log('SUBGL:' + subgl);
+      console.log('POS:' + pos);
+      newFileName = `${timestamp}_${pos}_${accountNumber}_${subgl}`; // Format penamaan
     }
 
     // Melakukan rename setelah upload hanya jika accountSKKO terisi
@@ -122,10 +124,12 @@ const uploadMultipleFiles = async (req, res) => {
       if (accountSKKO) {
         const parts = accountSKKO.split(' - '); // Memisahkan berdasarkan ' - '
         const accountNumber = parts[1]; // Ambil account number
-        const subgl = parts.length > 2 ? parts[0].trim() : ''; // Ambil subgl jika ada
-        const prefix = subgl ? `${subgl}_` : ''; // Prefix berdasarkan subgl jika ada
-
-        newFileName = `${timestamp}_${prefix}${accountNumber}_${i + 1}`; // Format penamaan
+        const subParts = parts[0].split(' / ');
+        const pos = subParts.length > 1 ? subParts[0].trim() : ''; // Ambil POS jika ada
+        const subgl = subParts.length > 1 ? subParts[1].trim() : ''; // Ambil subgl jika ada
+        console.log('SUBGL:' + subgl);
+        console.log('POS:' + pos);
+        newFileName = `${timestamp}_${pos}_${accountNumber}_${subgl}_${i + 1}`; // Format penamaan
       }
 
       // Melakukan rename setelah upload hanya jika accountSKKO terisi
