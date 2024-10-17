@@ -2,23 +2,28 @@
 
 ![Cloud Architecture](https://storage.googleapis.com/storage_file_updlbjb/photo/FLOW2.png)
 
-<h2>Steps on how to replicate the REST API for mobile and the FLASK API for model that created in this project :</h2>
+<h2>Step by step untuk recreate backend service dari Petty Cash :</h2>
 
-The creation of mobile API and model API in our project uses JS and Python. If you want to replicate it, please pay attention to the runtime version so that there are no packages that conflict with each other, especially in making API models.
+Pembuatan RESTFULL API untuk Petty Cash menggunakan Node.Js version 18.20.4 dan bisa dibuat telebih dahulu directory untuk tempat pengerjaannya nanti.
 
-Then, before creating the mobile API and API model, there are several things that need to be set in the project in GCP and in Firebase. These include cloud storage and firestore database, for configuration set according to project needs only.
-<br>
-      
-<h3>1. Mobile API</h3>
-
-We use cloud functions in firebase to deploy the API, then, these is step by step how to replicate the mobile API :
-
-- Open command promt and create directory for your code.
-- Open command promt and login with your firebase account.
+Lalu, jika directory sudah dibuat maka buka directory tersebut menggunakan VS Code dan open terminal.
+- Ketikkan command berikut untuk melakukan inisiasi project:
   
-        firebase login
+        npm init --y
+- Install beberapa library yang diperlukan dengan command menggunakan berikut:
   
-- After you have successfully logged in, run the init command. Then type y if promted.
+        npm install doteenv express fs googleapis moment multer
+
+        npm install --save-dev nodemon
+  
+- Setelah install library diatas, buka package.json dan ubah bagian scriptnya untuk bisa menjalankan nodemon nantinya :
+
+        "scripts": {
+          "start": "node index.js",
+          "dev": "nodemon index.js"
+        },
+  
+- Sesuaikan setiap structure folder dalam directorynya sebagai berikut :
 
         firebase init
   
