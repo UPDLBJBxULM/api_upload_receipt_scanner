@@ -25,8 +25,10 @@ Lalu, jika directory sudah dibuat maka buka directory tersebut menggunakan VS Co
   
 - Sesuaikan setiap structure folder dalam directorynya sebagai berikut :
 
-        firebase init
-  
+<div align="center">
+  <img src="https://storage.googleapis.com/storage_file_updlbjb/photo/structure.png" alt="Cloud Architecture">
+</div>
+
 - You will be given several feature options, select
 
         Functions : configure a cloud functions directory and its files.
