@@ -30,6 +30,7 @@ const uploadFileToDrive = async (file, type) => {
       requestBody: fileMetadata,
       media: media,
       fields: 'id, name',
+      supportsAllDrives: true, // Important for handling files in Shared Drives
     });
 
     const fileId = response.data.id;
@@ -42,6 +43,7 @@ const uploadFileToDrive = async (file, type) => {
         role: 'reader',
         type: 'anyone',
       },
+      supportsAllDrives: true, // Ensure permissions are set for Shared Drives
     });
     console.log('Permissions set for file:', fileId);
 
@@ -61,38 +63,29 @@ const uploadFileToDrive = async (file, type) => {
 };
 
 /**
- * Mengunggah multiple file ke Google Drive dan mengembalikan array berisi ID dan link berbagi
- * @param {Array} files - Array file yang diunggah oleh pengguna
- * @param {string} type - Tipe upload ('scan' atau 'bukti')
- * @returns {Array} - Array berisi objek { fileId, fileLink }
+ * Rename file in Google Drive after ensuring conditions are met
+ * @param {string} fileId - The ID of the file to rename
+ * @param {string} newFileName - The new name of the file
+ * @returns {Object} - Response from Google Drive API
  */
-const uploadMultipleFilesToDrive = async (files, type) => {
-  const uploadPromises = files.map(file => uploadFileToDrive(file, type));
-  const uploadedFiles = await Promise.all(uploadPromises);
-  return uploadedFiles;
-};
-
-/**
- * Mengganti nama file di Google Drive
- * @param {string} fileId - ID file yang akan diubah namanya
- * @param {string} newName - Nama baru untuk file
- */
-const renameFileInDrive = async (fileId, newName) => {
+const renameFileInDrive = async (fileId, newFileName) => {
   const auth = authenticateGoogle();
   const drive = google.drive({ version: 'v3', auth });
 
   try {
-    await drive.files.update({
+    const response = await drive.files.update({
       fileId: fileId,
       requestBody: {
-        name: newName,
+        name: newFileName,
       },
+      supportsAllDrives: true, // Important for handling files in Shared Drives
     });
-    console.log(`File renamed successfully to: ${newName}`);
+    console.log('File renamed to:', newFileName);
+    return response;
   } catch (error) {
-    console.error('Error renaming file:', error);
-    throw error; // Pastikan error dilempar agar dapat ditangani di controller
+    console.error('Error renaming file in Drive:', error);
+    throw error;
   }
 };
 
-module.exports = { uploadFileToDrive, uploadMultipleFilesToDrive, renameFileInDrive };
+module.exports = { uploadFileToDrive, renameFileInDrive };
