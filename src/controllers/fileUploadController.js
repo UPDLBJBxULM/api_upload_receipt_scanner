@@ -1,4 +1,4 @@
-const { uploadFileToDrive, renameFileInDrive, uploadMultipleFilesToDrive } = require('../services/googleDriveService');
+const { uploadFileToDrive, uploadMultipleFilesToDrive } = require('../services/googleDriveService');
 
 // Fungsi untuk mengupload file tunggal
 const uploadFile = async (req, res) => {
@@ -12,47 +12,39 @@ const uploadFile = async (req, res) => {
       status: 'failed',
       response: 400,
       data: {
-        message: 'No file uploaded'
-      }
+        message: 'No file uploaded',
+      },
     });
   }
 
   try {
-    console.log('Calling uploadFileToDrive');
-    const { fileId, fileLink } = await uploadFileToDrive(req.file, 'scan');
-    console.log('File uploaded successfully', { fileId, fileLink });
-
-    // Mengambil data untuk penamaan file baru
-    const accountSKKO = req.body.accountSKKO; // Asumsikan ini diambil dari field di request
+    const accountSKKO = req.body.accountSKKO; // Ambil accountSKKO dari request body
     const timestamp = new Date().toLocaleDateString('id-ID').split('/').reverse().join(''); // Format yyyymmdd
     console.log('Request body:', req.body);
-    console.log('Account SKKO:', req.body.accountSKKO);
+    console.log('Account SKKO:', accountSKKO);
 
-    // Mengekstrak bagian dari accountSKKO
+    // Membuat nama file baru sesuai format yang diinginkan
     let newFileName;
     if (accountSKKO) {
-      const parts = accountSKKO.split(' - '); // Memisahkan berdasarkan ' - '
-      const accountNumber = parts[1]; // Ambil account number
+      const parts = accountSKKO.split(' - ');
+      const accountNumber = parts[1];
       const subParts = parts[0].split(' / ');
-      const pos = subParts.length > 1 ? subParts[0].trim() : ''; // Ambil POS jika ada
-      const subgl = subParts.length > 1 ? subParts[1].trim() : ''; // Ambil subgl jika ada
-      console.log('SUBGL:' + subgl);
-      console.log('POS:' + pos);
-      newFileName = `${timestamp}_${pos}_${accountNumber}_${subgl}`; // Format penamaan
+      const pos = subParts.length > 1 ? subParts[0].trim() : '';
+      const subgl = subParts.length > 1 ? subParts[1].trim() : '';
+      newFileName = `${timestamp}_${pos}_${accountNumber}_${subgl}`; // Format nama file
     }
 
-    // Melakukan rename setelah upload hanya jika accountSKKO terisi
-    if (newFileName) {
-      await renameFileInDrive(fileId, newFileName);
-    }
+    console.log('Calling uploadFileToDrive with newFileName:', newFileName);
+    const { fileId, fileLink } = await uploadFileToDrive(req.file, 'scan', newFileName);
+    console.log('File uploaded successfully', { fileId, fileLink });
 
     res.status(200).json({
       status: 'success',
       response: 200,
       data: {
         fileId,
-        fileLink
-      }
+        fileLink,
+      },
     });
   } catch (error) {
     console.error('Error in file upload controller:', error);
@@ -65,7 +57,7 @@ const uploadFile = async (req, res) => {
       message = 'Authentication failed. Please check your credentials.';
     } else if (error.message.includes('File not found')) {
       status = 'failed';
-      code = 500; // Sesuaikan jika perlu
+      code = 500;
       message = `File not found: ${error.message.split(': ')[1] || ''}`;
     } else if (error.code === 'ECONNREFUSED') {
       status = 'failed';
@@ -81,8 +73,8 @@ const uploadFile = async (req, res) => {
       status,
       response: code,
       data: {
-        message
-      }
+        message,
+      },
     };
 
     console.log('Sending error response:', errorResponse);
@@ -102,40 +94,34 @@ const uploadMultipleFiles = async (req, res) => {
       status: 'failed',
       response: 400,
       data: {
-        message: 'No files uploaded'
-      }
+        message: 'No files uploaded',
+      },
     });
   }
 
   try {
-    console.log('Calling uploadMultipleFilesToDrive');
-    const accountSKKO = req.body.accountSKKO; // Ambil accountSKKO dari body
+    const accountSKKO = req.body.accountSKKO;
     const timestamp = new Date().toLocaleDateString('id-ID').split('/').reverse().join(''); // Format yyyymmdd
     console.log('Request body:', req.body);
-    console.log('Account SKKO:', req.body.accountSKKO);
+    console.log('Account SKKO:', accountSKKO);
 
     const uploadedFiles = [];
     for (let i = 0; i < req.files.length; i++) {
       const file = req.files[i];
-      const { fileId, fileLink } = await uploadFileToDrive(file, 'bukti');
 
       // Menyusun nama file baru dengan increment jika accountSKKO terisi
       let newFileName;
       if (accountSKKO) {
-        const parts = accountSKKO.split(' - '); // Memisahkan berdasarkan ' - '
-        const accountNumber = parts[1]; // Ambil account number
+        const parts = accountSKKO.split(' - ');
+        const accountNumber = parts[1];
         const subParts = parts[0].split(' / ');
-        const pos = subParts.length > 1 ? subParts[0].trim() : ''; // Ambil POS jika ada
-        const subgl = subParts.length > 1 ? subParts[1].trim() : ''; // Ambil subgl jika ada
-        console.log('SUBGL:' + subgl);
-        console.log('POS:' + pos);
-        newFileName = `${timestamp}_${pos}_${accountNumber}_${subgl}_${i + 1}`; // Format penamaan
+        const pos = subParts.length > 1 ? subParts[0].trim() : '';
+        const subgl = subParts.length > 1 ? subParts[1].trim() : '';
+        newFileName = `${timestamp}_${pos}_${accountNumber}_${subgl}_${i + 1}`; // Format nama file dengan increment
       }
 
-      // Melakukan rename setelah upload hanya jika accountSKKO terisi
-      if (newFileName) {
-        await renameFileInDrive(fileId, newFileName);
-      }
+      console.log('Calling uploadFileToDrive with newFileName:', newFileName);
+      const { fileId, fileLink } = await uploadFileToDrive(file, 'bukti', newFileName);
 
       uploadedFiles.push({ fileId, fileLink });
     }
@@ -144,7 +130,7 @@ const uploadMultipleFiles = async (req, res) => {
     res.status(200).json({
       status: 'success',
       response: 200,
-      data: uploadedFiles
+      data: uploadedFiles,
     });
   } catch (error) {
     console.error('Error in multiple file upload controller:', error);
@@ -157,7 +143,7 @@ const uploadMultipleFiles = async (req, res) => {
       message = 'Authentication failed. Please check your credentials.';
     } else if (error.message.includes('File not found')) {
       status = 'failed';
-      code = 500; // Sesuaikan jika perlu
+      code = 500;
       message = `File not found: ${error.message.split(': ')[1] || ''}`;
     } else if (error.code === 'ECONNREFUSED') {
       status = 'failed';
@@ -173,8 +159,8 @@ const uploadMultipleFiles = async (req, res) => {
       status,
       response: code,
       data: {
-        message
-      }
+        message,
+      },
     };
 
     console.log('Sending error response:', errorResponse);

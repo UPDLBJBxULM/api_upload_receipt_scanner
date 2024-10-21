@@ -6,17 +6,19 @@ const authenticateGoogle = require('../config/googleAuth.js');
  * Mengunggah satu file ke Google Drive dan mengembalikan ID dan link berbagi
  * @param {Object} file - File yang diunggah oleh pengguna
  * @param {string} type - Tipe upload ('scan' atau 'bukti')
+ * @param {string} fileName - Nama file yang ingin digunakan di Google Drive
  * @returns {Object} - Berisi fileId dan fileLink
  */
-const uploadFileToDrive = async (file, type) => {
+const uploadFileToDrive = async (file, type, fileName) => {
   const folderId = type === 'scan' ? process.env.DRIVE_FOLDER_ID_SCAN : process.env.DRIVE_FOLDER_ID_BUKTI;
   console.log(`Uploading file to ${type} folder with ID: ${folderId}`);
 
   const auth = authenticateGoogle();
   const drive = google.drive({ version: 'v3', auth });
 
+  // Gunakan fileName jika disediakan, jika tidak gunakan nama file asli
   const fileMetadata = {
-    name: file.originalname,
+    name: fileName || file.originalname,
     parents: [folderId],
   };
   const media = {
@@ -62,30 +64,5 @@ const uploadFileToDrive = async (file, type) => {
   }
 };
 
-/**
- * Rename file in Google Drive after ensuring conditions are met
- * @param {string} fileId - The ID of the file to rename
- * @param {string} newFileName - The new name of the file
- * @returns {Object} - Response from Google Drive API
- */
-const renameFileInDrive = async (fileId, newFileName) => {
-  const auth = authenticateGoogle();
-  const drive = google.drive({ version: 'v3', auth });
 
-  try {
-    const response = await drive.files.update({
-      fileId: fileId,
-      requestBody: {
-        name: newFileName,
-      },
-      supportsAllDrives: true, // Important for handling files in Shared Drives
-    });
-    console.log('File renamed to:', newFileName);
-    return response;
-  } catch (error) {
-    console.error('Error renaming file in Drive:', error);
-    throw error;
-  }
-};
-
-module.exports = { uploadFileToDrive, renameFileInDrive };
+module.exports = { uploadFileToDrive};
