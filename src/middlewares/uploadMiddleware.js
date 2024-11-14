@@ -1,6 +1,4 @@
 const multer = require('multer');
-const path = require('path');
-const { uploadMultipleFiles } = require('../controllers/fileUploadController');
 
 // Konfigurasi penyimpanan sementara menggunakan Multer
 const storage = multer.diskStorage({

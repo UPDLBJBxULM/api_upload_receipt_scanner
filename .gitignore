@@ -1,6 +1,4 @@
 # .gitignore
 
-service-account-key.json
-.env
 uploads/
 node_modules

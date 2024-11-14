@@ -39,7 +39,6 @@ const uploadFile = async (req, res) => {
       console.log("subgl :" + subgl);
       console.log("pos :" + pos);
 
-      // Jika ada subgl, tambahkan ke format nama file, jika tidak, hanya gunakan pos dan accountNumber
       newFileName = subgl
         ? `${timestamp}_${pos}_${accountNumber}_${subgl}`
         : `${timestamp}_${pos}_${accountNumber}`;
@@ -64,7 +63,7 @@ const uploadFile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error in file upload controller:", error);
+    console.error("Error in file upload controller:", error.stack || error);
 
     let status, code, message;
 
@@ -126,11 +125,8 @@ const uploadMultipleFiles = async (req, res) => {
     console.log("Request body:", req.body);
     console.log("Account SKKO:", accountSKKO);
 
-    const uploadedFiles = [];
-    for (let i = 0; i < req.files.length; i++) {
-      const file = req.files[i];
-
-      // Menyusun nama file baru dengan increment jika accountSKKO terisi
+    // Menggunakan Promise.all untuk paralelisasi upload file
+    const uploadPromises = req.files.map((file, i) => {
       let newFileName;
       if (accountSKKO) {
         const parts = accountSKKO.split(" - ");
@@ -142,7 +138,7 @@ const uploadMultipleFiles = async (req, res) => {
         console.log("subgl :" + subgl);
         console.log("pos :" + pos);
 
-        // Jika ada subgl, tambahkan ke format nama file, jika tidak, hanya gunakan pos dan accountNumber
+        // Menambahkan increment index pada nama file
         newFileName = subgl
           ? `${timestamp}_${pos}_${accountNumber}_${subgl}_${i + 1}`
           : `${timestamp}_${pos}_${accountNumber}_${i + 1}`;
@@ -150,15 +146,12 @@ const uploadMultipleFiles = async (req, res) => {
         console.log("Nama file: " + newFileName);
       }
 
-      console.log("Calling uploadFileToDrive with newFileName:", newFileName);
-      const { fileId, fileLink } = await uploadFileToDrive(
-        file,
-        "bukti",
-        newFileName
-      );
+      // Mengunggah file ke Google Drive
+      return uploadFileToDrive(file, "bukti", newFileName);
+    });
 
-      uploadedFiles.push({ fileId, fileLink });
-    }
+    // Tunggu semua file terupload
+    const uploadedFiles = await Promise.all(uploadPromises);
 
     console.log("Files uploaded successfully", uploadedFiles);
     res.status(200).json({
@@ -167,7 +160,7 @@ const uploadMultipleFiles = async (req, res) => {
       data: uploadedFiles,
     });
   } catch (error) {
-    console.error("Error in multiple file upload controller:", error);
+    console.error("Error in multiple file upload controller:", error.stack || error);
 
     let status, code, message;
 
